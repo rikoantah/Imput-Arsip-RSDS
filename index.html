@@ -8,7 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
+*{
+  box-sizing:border-box;
+  font-family:"Segoe UI",Arial,sans-serif
+}
+
 body{
   margin:0;
   min-height:100vh;
@@ -17,82 +21,131 @@ body{
   align-items:center;
   justify-content:center;
 }
+
+/* === WRAPPER & CARD DIBESARKAN UNTUK PC === */
 .wrapper{
   width:100%;
-  max-width:900px;
-  padding:40px;
+  max-width:1200px; /* LEBAR PC */
+  padding:60px;
 }
+
 .card{
   background:#fff;
-  border-radius:18px;
-  padding:40px 48px;
-  box-shadow:0 20px 50px rgba(0,0,0,.25);
+  border-radius:22px;
+  padding:60px 70px;
+  box-shadow:0 25px 60px rgba(0,0,0,.3);
 }
+
+/* === JUDUL === */
 h2{
   margin:0;
-  font-size:26px;
+  font-size:32px;
   text-align:center;
 }
+
 .sub{
   text-align:center;
   color:#555;
-  margin-bottom:30px;
+  margin:12px 0 40px;
+  font-size:17px;
 }
+
+/* === GRID FORM === */
 .form-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:22px 28px;
+  gap:32px 40px;
 }
-.full{grid-column:1 / -1}
+
+.full{
+  grid-column:1 / -1;
+}
+
+/* === LABEL === */
 label{
-  font-weight:600;
+  font-weight:700;
   display:block;
-  margin-bottom:6px;
+  margin-bottom:10px;
+  font-size:16px;
 }
-input,select{
+
+/* === INPUT & SELECT DIPERBESAR === */
+input,
+select{
   width:100%;
-  padding:12px 14px;
-  font-size:15px;
-  border-radius:10px;
+  padding:18px 20px;
+  font-size:17px;
+  border-radius:14px;
   border:1px solid #ccc;
 }
-input:focus,select:focus{
+
+input:focus,
+select:focus{
   outline:none;
   border-color:#1976d2;
 }
+
+/* === FILE INPUT KHUSUS DIPERBESAR === */
+input[type="file"]{
+  padding:22px;
+  font-size:16px;
+  cursor:pointer;
+  border:2px dashed #1976d2;
+  background:#f4f8ff;
+}
+
+/* === BUTTON === */
 button{
-  margin-top:30px;
+  margin-top:40px;
   width:100%;
-  padding:14px;
-  font-size:17px;
-  font-weight:600;
+  padding:20px;
+  font-size:20px;
+  font-weight:700;
   border:none;
-  border-radius:12px;
+  border-radius:16px;
   background:#1976d2;
   color:#fff;
   cursor:pointer;
 }
-button:disabled{background:#aaa}
-#status{
-  margin-top:16px;
-  text-align:center;
-  font-weight:600;
+
+button:disabled{
+  background:#aaa;
 }
+
+/* === STATUS === */
+#status{
+  margin-top:20px;
+  text-align:center;
+  font-weight:700;
+  font-size:16px;
+}
+
+/* === AUTOCOMPLETE === */
+.relative{
+  position:relative;
+}
+
 #suggestion{
   position:absolute;
+  width:100%;
   background:#fff;
-  border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,.2);
-  max-height:220px;
+  border-radius:14px;
+  box-shadow:0 15px 35px rgba(0,0,0,.25);
+  max-height:260px;
   overflow-y:auto;
   z-index:10;
 }
+
 .item{
-  padding:12px 14px;
+  padding:16px 20px;
   cursor:pointer;
+  font-size:16px;
 }
-.item:hover{background:#f1f1f1}
-.relative{position:relative}
+
+.item:hover{
+  background:#f1f1f1;
+}
+
 </style>
 </head>
 
