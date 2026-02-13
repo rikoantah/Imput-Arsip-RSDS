@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Upload Arsip RSDS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#1565c0,#42a5f5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.card{
+  background:#fff;
+  width:100%;
+  max-width:420px;
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 15px 40px rgba(0,0,0,.2);
+}
+h2{text-align:center;margin:0}
+.sub{text-align:center;color:#666;margin-bottom:20px}
+label{font-weight:600;margin-top:12px;display:block}
+input,select,button{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  font-size:14px;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:#1565c0;
+}
+button{
+  margin-top:20px;
+  background:#1565c0;
+  color:#fff;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+}
+button:disabled{background:#aaa}
+#suggestion{
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 5px 15px rgba(0,0,0,.15);
+  max-height:180px;
+  overflow-y:auto;
+}
+.item{
+  padding:10px;
+  cursor:pointer;
+}
+.item:hover{background:#f1f1f1}
+#status{text-align:center;margin-top:12px;font-weight:600}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <h2>📂 Upload Arsip Pegawai</h2>
+  <div class="sub">RSUD Dr. Soedarso</div>
+
+  <form id="form">
+    <label>Nama Pegawai</label>
+    <input id="nama" autocomplete="off" placeholder="Ketik nama..." required>
+    <div id="suggestion"></div>
+
+    <label>NIP / NIK</label>
+    <input id="nip" readonly required>
+
+    <label>Jenis Arsip</label>
+    <select id="jenis" required>
+      <option value="">-- Pilih --</option>
+      <option value="Cuti">Cuti</option>
+      <option value="Gaji Berkala">Gaji Berkala</option>
+      <option value="SIB-SIP">SIB / SIP</option>
+    </select>
+
+    <label>Upload PDF</label>
+    <input type="file" id="file" accept="application/pdf" required>
+
+    <button id="btn">Upload</button>
+    <div id="status"></div>
+  </form>
+</div>
+
+<script>
+/* ================== KONFIGURASI ================== */
+const SUPABASE_URL = "https://xmbsrxkhatebzsqeyxms.supabase.co";
+const SUPABASE_ANON_KEY = "ISI_DENGAN_ANON_PUBLIC_KEY";
+const BUCKET = "Arsip RSDS";
+
+/* ================== INIT ================== */
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const nama = document.getElementById("nama");
+const nip = document.getElementById("nip");
+const jenis = document.getElementById("jenis");
+const fileInput = document.getElementById("file");
+const suggestion = document.getElementById("suggestion");
+const statusBox = document.getElementById("status");
+const btn = document.getElementById("btn");
+
+/* ================== AUTOCOMPLETE ================== */
+nama.addEventListener("input", async () => {
+  suggestion.innerHTML = "";
+  if (nama.value.length < 2) return;
+
+  const { data } = await sb
+    .from("data_sync_pegawai")
+    .select("nama,nip_nik")
+    .ilike("nama", `%${nama.value}%`)
+    .limit(10);
+
+  if (!data) return;
+
+  data.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent = r.nama;
+    div.onclick = () => {
+      nama.value = r.nama;
+      nip.value = r.nip_nik;
+      suggestion.innerHTML = "";
+    };
+    suggestion.appendChild(div);
+  });
+});
+
+/* ================== SUBMIT ================== */
+document.getElementById("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  btn.disabled = true;
+  statusBox.textContent = "⏳ Mengunggah...";
+
+  const file = fileInput.files[0];
+  if (!file || file.type !== "application/pdf") {
+    statusBox.textContent = "❌ File harus PDF";
+    btn.disabled = false;
+    return;
+  }
+
+  const now = new Date();
+  const tanggal = String(now.getDate()).padStart(2,"0") + "-" +
+                  String(now.getMonth()+1).padStart(2,"0") + "-" +
+                  now.getFullYear();
+
+  const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
+  const fileName = `${safeNama}-${nip.value}-${jenis.value}-${tanggal}.pdf`;
+
+  const { error } = await sb.storage
+    .from(BUCKET)
+    .upload(fileName, file, { upsert:false });
+
+  if (error) {
+    statusBox.textContent = "❌ Gagal upload";
+  } else {
+    statusBox.textContent = "✅ Arsip berhasil diupload";
+    e.target.reset();
+  }
+
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>
