@@ -8,100 +8,146 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;font-family:Segoe UI,sans-serif}
+*{box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
 body{
   margin:0;
   min-height:100vh;
-  background:linear-gradient(135deg,#1565c0,#42a5f5);
+  background:linear-gradient(135deg,#0d47a1,#1976d2);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+}
+.wrapper{
+  width:100%;
+  max-width:900px;
+  padding:40px;
 }
 .card{
   background:#fff;
-  width:100%;
-  max-width:420px;
-  border-radius:16px;
-  padding:24px;
-  box-shadow:0 15px 40px rgba(0,0,0,.2);
+  border-radius:18px;
+  padding:40px 48px;
+  box-shadow:0 20px 50px rgba(0,0,0,.25);
 }
-h2{text-align:center;margin:0}
-.sub{text-align:center;color:#666;margin-bottom:20px}
-label{font-weight:600;margin-top:12px;display:block}
-input,select,button{
+h2{
+  margin:0;
+  font-size:26px;
+  text-align:center;
+}
+.sub{
+  text-align:center;
+  color:#555;
+  margin-bottom:30px;
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px 28px;
+}
+.full{grid-column:1 / -1}
+label{
+  font-weight:600;
+  display:block;
+  margin-bottom:6px;
+}
+input,select{
   width:100%;
-  padding:12px;
-  margin-top:6px;
+  padding:12px 14px;
+  font-size:15px;
   border-radius:10px;
-  border:1px solid #ddd;
-  font-size:14px;
+  border:1px solid #ccc;
 }
 input:focus,select:focus{
   outline:none;
-  border-color:#1565c0;
+  border-color:#1976d2;
 }
 button{
-  margin-top:20px;
-  background:#1565c0;
-  color:#fff;
+  margin-top:30px;
+  width:100%;
+  padding:14px;
+  font-size:17px;
+  font-weight:600;
   border:none;
-  font-size:16px;
+  border-radius:12px;
+  background:#1976d2;
+  color:#fff;
   cursor:pointer;
 }
 button:disabled{background:#aaa}
+#status{
+  margin-top:16px;
+  text-align:center;
+  font-weight:600;
+}
 #suggestion{
+  position:absolute;
   background:#fff;
-  border-radius:8px;
-  box-shadow:0 5px 15px rgba(0,0,0,.15);
-  max-height:180px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  max-height:220px;
   overflow-y:auto;
+  z-index:10;
 }
 .item{
-  padding:10px;
+  padding:12px 14px;
   cursor:pointer;
 }
 .item:hover{background:#f1f1f1}
-#status{text-align:center;margin-top:12px;font-weight:600}
+.relative{position:relative}
 </style>
 </head>
 
 <body>
-<div class="card">
-  <h2>📂 Upload Arsip Pegawai</h2>
-  <div class="sub">RSUD Dr. Soedarso</div>
+<div class="wrapper">
+  <div class="card">
+    <h2>📂 Upload Arsip Pegawai</h2>
+    <div class="sub">RSUD Dr. Soedarso</div>
 
-  <form id="form">
-    <label>Nama Pegawai</label>
-    <input id="nama" autocomplete="off" placeholder="Ketik nama..." required>
-    <div id="suggestion"></div>
+    <form id="form">
+      <div class="form-grid">
 
-    <label>NIP / NIK</label>
-    <input id="nip" readonly required>
+        <div class="relative">
+          <label>Nama Pegawai</label>
+          <input id="nama" autocomplete="off" placeholder="Ketik minimal 2 huruf..." required>
+          <div id="suggestion"></div>
+        </div>
 
-    <label>Jenis Arsip</label>
-    <select id="jenis" required>
-      <option value="">-- Pilih --</option>
-      <option value="Cuti">Cuti</option>
-      <option value="Gaji Berkala">Gaji Berkala</option>
-      <option value="SIB-SIP">SIB / SIP</option>
-    </select>
+        <div>
+          <label>NIP / NIK</label>
+          <input id="nip" readonly required>
+        </div>
 
-    <label>Upload PDF</label>
-    <input type="file" id="file" accept="application/pdf" required>
+        <div>
+          <label>Jenis Arsip</label>
+          <select id="jenis" required>
+            <option value="">-- Pilih Jenis Arsip --</option>
+            <option value="Cuti">Cuti</option>
+            <option value="Gaji Berkala">Gaji Berkala</option>
+            <option value="SIB-SIP">SIB / SIP</option>
+          </select>
+        </div>
 
-    <button id="btn">Upload</button>
-    <div id="status"></div>
-  </form>
+        <div>
+          <label>Upload File (PDF)</label>
+          <input type="file" id="file" accept="application/pdf" required>
+        </div>
+
+        <div class="full">
+          <button id="btn">⬆️ Upload Arsip</button>
+          <div id="status"></div>
+        </div>
+
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
-/* ================== KONFIGURASI ================== */
+/* ================= KONFIGURASI ================= */
 const SUPABASE_URL = "https://xmbsrxkhatebzsqeyxms.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnNyeGtoYXRlYnpzcWV5eG1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTU4NjYsImV4cCI6MjA4NjQ5MTg2Nn0.TJCPXhSm_XrIXIl0BgYn3LaF5O7j5zhfqghJUgJSy88";
 const BUCKET = "Arsip RSDS";
 
-/* ================== INIT ================== */
+/* ================= INIT ================= */
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const nama = document.getElementById("nama");
@@ -112,7 +158,7 @@ const suggestion = document.getElementById("suggestion");
 const statusBox = document.getElementById("status");
 const btn = document.getElementById("btn");
 
-/* ================== AUTOCOMPLETE ================== */
+/* ================= AUTOCOMPLETE ================= */
 nama.addEventListener("input", async () => {
   suggestion.innerHTML = "";
   if (nama.value.length < 2) return;
@@ -138,7 +184,7 @@ nama.addEventListener("input", async () => {
   });
 });
 
-/* ================== SUBMIT ================== */
+/* ================= SUBMIT ================= */
 document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
   btn.disabled = true;
@@ -152,9 +198,10 @@ document.getElementById("form").addEventListener("submit", async e => {
   }
 
   const now = new Date();
-  const tanggal = String(now.getDate()).padStart(2,"0") + "-" +
-                  String(now.getMonth()+1).padStart(2,"0") + "-" +
-                  now.getFullYear();
+  const tanggal =
+    String(now.getDate()).padStart(2,"0") + "-" +
+    String(now.getMonth()+1).padStart(2,"0") + "-" +
+    now.getFullYear();
 
   const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
   const fileName = `${safeNama}-${nip.value}-${jenis.value}-${tanggal}.pdf`;
@@ -163,13 +210,11 @@ document.getElementById("form").addEventListener("submit", async e => {
     .from(BUCKET)
     .upload(fileName, file, { upsert:false });
 
-  if (error) {
-    statusBox.textContent = "❌ Gagal upload";
-  } else {
-    statusBox.textContent = "✅ Arsip berhasil diupload";
-    e.target.reset();
-  }
+  statusBox.textContent = error
+    ? "❌ Gagal upload"
+    : "✅ Arsip berhasil diupload";
 
+  if (!error) e.target.reset();
   btn.disabled = false;
 });
 </script>
