@@ -69,21 +69,25 @@ body{
   overflow:hidden;
 }
 
-/* ===== FORM ===== */
-.form-grid{
-  display:grid;
-  grid-template-columns:1.2fr 1fr 1fr 1fr;
-  gap:14px;
+/* ===== UPLOAD (VERTIKAL) ===== */
+.upload-wrap{
+  max-width:600px;          /* fokus PC, tidak kepanjangan */
+}
+
+.upload-group{
+  margin-bottom:14px;
 }
 
 label{
   font-size:13px;
   font-weight:700;
+  display:block;
+  margin-bottom:6px;
 }
 
 input,select{
   width:100%;
-  padding:10px 12px;
+  padding:12px 14px;
   border-radius:8px;
   border:1px solid #ccc;
   font-size:14px;
@@ -95,19 +99,22 @@ input[type=file]{
 }
 
 button{
-  padding:12px;
+  padding:14px;
   border:none;
   border-radius:10px;
   background:#1976d2;
   color:#fff;
   font-weight:700;
   cursor:pointer;
+  width:100%;
 }
 
-button.danger{background:#d32f2f}
-button.small{padding:6px 10px;font-size:13px}
-
 button:disabled{background:#aaa}
+
+#status{
+  margin-top:10px;
+  font-weight:700;
+}
 
 /* ===== AUTOCOMPLETE ===== */
 .relative{position:relative}
@@ -131,13 +138,7 @@ button:disabled{background:#aaa}
 }
 .item:hover{background:#f1f1f1}
 
-/* ===== STATUS ===== */
-#status{
-  margin-top:8px;
-  font-weight:700;
-}
-
-/* ===== TABLE ===== */
+/* ===== MANAGE (TIDAK DIUBAH) ===== */
 .manage{
   height:100%;
   display:flex;
@@ -177,6 +178,9 @@ th{
   display:flex;
   gap:6px;
 }
+
+button.small{padding:6px 10px;font-size:13px}
+button.danger{background:#d32f2f}
 </style>
 </head>
 
@@ -194,50 +198,46 @@ th{
 
     <div class="content">
 
-      <!-- ================= UPLOAD ================= -->
+      <!-- ================= UPLOAD (VERTIKAL) ================= -->
       <div id="uploadTab">
-        <form id="form">
-          <div class="form-grid">
+        <form id="form" class="upload-wrap">
 
-            <div class="relative">
-              <label>Nama Pegawai</label>
-              <input id="nama" autocomplete="off" required>
-              <div id="suggestion"></div>
-            </div>
-
-            <div>
-              <label>NIP</label>
-              <input id="nip" readonly required>
-            </div>
-
-            <div>
-              <label>Jenis Arsip</label>
-              <select id="jenis" required>
-                <option value="">Pilih</option>
-                <option value="SK Gaji Berkala">SK Gaji Berkala</option>
-                <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
-                <option value="Cuti">Cuti</option>
-                <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
-                <option value="Pengantar Ukom">Pengantar Ukom</option>
-                <option value="SIB-SIP">SIB / SIP</option>
-              </select>
-            </div>
-
-            <div>
-              <label>File PDF (≤ 2 MB)</label>
-              <input type="file" id="file" accept="application/pdf" required>
-            </div>
-
-            <div style="grid-column:1/-1">
-              <button id="btn">⬆️ Upload Arsip</button>
-              <div id="status"></div>
-            </div>
-
+          <div class="upload-group relative">
+            <label>Nama Pegawai</label>
+            <input id="nama" autocomplete="off" required>
+            <div id="suggestion"></div>
           </div>
+
+          <div class="upload-group">
+            <label>NIP</label>
+            <input id="nip" readonly required>
+          </div>
+
+          <div class="upload-group">
+            <label>Jenis Arsip</label>
+            <select id="jenis" required>
+              <option value="">Pilih</option>
+              <option value="SK Gaji Berkala">SK Gaji Berkala</option>
+              <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
+              <option value="Cuti">Cuti</option>
+              <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
+              <option value="Pengantar Ukom">Pengantar Ukom</option>
+              <option value="SIB-SIP">SIB / SIP</option>
+            </select>
+          </div>
+
+          <div class="upload-group">
+            <label>Upload File (PDF ≤ 2 MB)</label>
+            <input type="file" id="file" accept="application/pdf" required>
+          </div>
+
+          <button id="btn">⬆️ Upload Arsip</button>
+          <div id="status"></div>
+
         </form>
       </div>
 
-      <!-- ================= MANAGE ================= -->
+      <!-- ================= MANAGE (ASLI) ================= -->
       <div id="manageTab" style="display:none" class="manage">
         <input id="searchFile" placeholder="Cari nama file..." oninput="loadFiles()">
         <div class="table-wrap">
@@ -273,7 +273,7 @@ function switchTab(tab,el){
   if(tab==="manage") loadFiles();
 }
 
-/* ===== AUTOCOMPLETE ===== */
+/* AUTOCOMPLETE */
 nama.oninput = async ()=>{
   suggestion.innerHTML="";
   if(nama.value.length<2) return;
@@ -294,7 +294,7 @@ nama.oninput = async ()=>{
   });
 };
 
-/* ===== UPLOAD ===== */
+/* UPLOAD */
 form.onsubmit = async e=>{
   e.preventDefault();
   btn.disabled=true;
@@ -317,7 +317,7 @@ form.onsubmit = async e=>{
   btn.disabled=false;
 };
 
-/* ===== LIST ===== */
+/* MANAGE */
 async function loadFiles(){
   const q = searchFile.value.toLowerCase();
   const {data} = await sb.storage.from(BUCKET).list("",{limit:1000});
