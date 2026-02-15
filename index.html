@@ -306,58 +306,73 @@ nama.oninput = async ()=>{
 /* UPLOAD */
 form.onsubmit = async e=>{
   e.preventDefault();
-  btn.disabled=true;
-  status.textContent="⏳ Uploading...";
+  if(btn.disabled) return;
 
-  const file=fileInput.files[0];
-  if(!file || file.size>MAX_SIZE){
-    status.textContent="❌ File maksimal 2 MB";
-    btn.disabled=false;return;
+  btn.disabled = true;
+  status.textContent = "⏳ Mengunggah ke server...";
+
+  try {
+    const file = fileInput.files[0];
+    if (!file) throw "File tidak ditemukan";
+    if (file.size > MAX_SIZE) throw "Ukuran file maksimal 2 MB";
+
+    const now = new Date();
+    const ts =
+      now.getFullYear() + "-" +
+      String(now.getMonth()+1).padStart(2,"0") + "-" +
+      String(now.getDate()).padStart(2,"0") + "_" +
+      String(now.getHours()).padStart(2,"0") + "-" +
+      String(now.getMinutes()).padStart(2,"0") + "-" +
+      String(now.getSeconds()).padStart(2,"0");
+
+    const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
+    const fileName = `${safeNama}-${nip.value}-${jenis.value}-${ts}.pdf`;
+
+    let uploaded = false;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        status.textContent = `⏳ Upload percobaan ${attempt}...`;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+
+        const { error } = await sb.storage
+          .from(BUCKET)
+          .upload(fileName, file, {
+            upsert: false,
+            signal: controller.signal
+          });
+
+        clearTimeout(timeout);
+
+        if (error) throw error;
+        uploaded = true;
+        break;
+
+      } catch (err) {
+        lastError = err;
+        await new Promise(r => setTimeout(r, 1200));
+      }
+    }
+
+    if (!uploaded) {
+      throw lastError || "Upload gagal";
+    }
+
+    status.textContent = "✅ Arsip berhasil diupload";
+    form.reset();
+
+  } catch (err) {
+    status.textContent =
+      err.name === "AbortError"
+        ? "❌ Upload timeout (koneksi lambat)"
+        : "❌ Upload gagal, silakan ulangi";
+
+  } finally {
+    btn.disabled = false;
   }
-
-  const now=new Date();
-  const ts = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-  const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
-  const fileName = `${safeNama}-${nip.value}-${jenis.value}-${ts}.pdf`;
-
-  const {error} = await sb.storage.from(BUCKET).upload(fileName,file,{upsert:false});
-  status.textContent = error ? "❌ Upload gagal" : "✅ Upload berhasil";
-  if(!error) e.target.reset();
-  btn.disabled=false;
-};
-
-/* MANAGE */
-async function loadFiles(){
-  const q = searchFile.value.toLowerCase();
-  const {data} = await sb.storage.from(BUCKET).list("",{limit:1000});
-  fileList.innerHTML="";
-  if(!data) return;
-
-  data
-    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
-    .filter(f=>f.name.toLowerCase().includes(q))
-    .forEach(f=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td>${f.name}</td>
-        <td class="actions">
-          <button class="small" onclick="viewFile('${f.name}')">👁️ View</button>
-          <button class="small danger" onclick="deleteFile('${f.name}')">🗑️ Delete</button>
-        </td>`;
-      fileList.appendChild(tr);
-    });
-}
-
-function viewFile(name){
-  const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(name)}`;
-  window.open(url,"_blank");
-}
-
-async function deleteFile(name){
-  if(!confirm("Yakin hapus arsip ini?")) return;
-  await sb.storage.from(BUCKET).remove([name]);
-  loadFiles();
-}
 </script>
 </body>
 </html>
