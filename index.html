@@ -12,45 +12,50 @@
 
 body{
   margin:0;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0d47a1,#1976d2);
+  height:100vh;
+  background:#e9eef6;
   display:flex;
-  align-items:center;
-  justify-content:center;
 }
 
-.wrapper{
+.app{
   width:100%;
-  max-width:1300px;
-  padding:40px;
+  padding:20px;
 }
 
 .card{
   background:#fff;
-  border-radius:22px;
-  padding:40px 50px;
-  box-shadow:0 25px 60px rgba(0,0,0,.3);
+  border-radius:14px;
+  padding:20px 24px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
 /* ===== HEADER ===== */
-h2{text-align:center;font-size:30px;margin:0}
-.sub{text-align:center;color:#555;margin:10px 0 30px}
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
 
-/* ===== TAB ===== */
+.header h2{
+  margin:0;
+  font-size:24px;
+}
+
 .tabs{
   display:flex;
-  gap:10px;
-  margin-bottom:30px;
+  gap:6px;
 }
 
 .tab{
-  flex:1;
-  padding:14px;
-  text-align:center;
-  font-weight:700;
-  border-radius:14px;
+  padding:8px 14px;
+  border-radius:10px;
+  font-weight:600;
   cursor:pointer;
-  background:#e3eaf7;
+  background:#eef2f9;
 }
 
 .tab.active{
@@ -58,23 +63,30 @@ h2{text-align:center;font-size:30px;margin:0}
   color:#fff;
 }
 
+/* ===== CONTENT ===== */
+.content{
+  flex:1;
+  overflow:hidden;
+}
+
 /* ===== FORM ===== */
 .form-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:25px 35px;
+  grid-template-columns:1.2fr 1fr 1fr 1fr;
+  gap:14px;
 }
 
-.full{grid-column:1/-1}
-
-label{font-weight:700;margin-bottom:8px;display:block}
+label{
+  font-size:13px;
+  font-weight:700;
+}
 
 input,select{
   width:100%;
-  padding:16px;
-  border-radius:12px;
+  padding:10px 12px;
+  border-radius:8px;
   border:1px solid #ccc;
-  font-size:16px;
+  font-size:14px;
 }
 
 input[type=file]{
@@ -83,135 +95,169 @@ input[type=file]{
 }
 
 button{
-  padding:18px;
-  font-size:18px;
-  font-weight:700;
+  padding:12px;
   border:none;
-  border-radius:14px;
+  border-radius:10px;
   background:#1976d2;
   color:#fff;
+  font-weight:700;
   cursor:pointer;
 }
 
 button.danger{background:#d32f2f}
-button.small{padding:8px 14px;font-size:14px}
+button.small{padding:6px 10px;font-size:13px}
 
-button:disabled{background:#aaa;cursor:not-allowed}
-
-#status{text-align:center;font-weight:700;margin-top:15px}
+button:disabled{background:#aaa}
 
 /* ===== AUTOCOMPLETE ===== */
 .relative{position:relative}
+
 #suggestion{
   position:absolute;
-  width:100%;
+  top:100%;
+  left:0;
+  right:0;
   background:#fff;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2);
-  z-index:10;
+  border-radius:8px;
+  box-shadow:0 6px 20px rgba(0,0,0,.2);
+  max-height:200px;
+  overflow-y:auto;
+  z-index:99;
 }
 
-.item{padding:14px;cursor:pointer}
+.item{
+  padding:10px;
+  cursor:pointer;
+}
 .item:hover{background:#f1f1f1}
 
+/* ===== STATUS ===== */
+#status{
+  margin-top:8px;
+  font-weight:700;
+}
+
 /* ===== TABLE ===== */
-.table-wrap{margin-top:20px}
+.manage{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.manage input{
+  margin-bottom:10px;
+}
+
+.table-wrap{
+  flex:1;
+  overflow:auto;
+  border:1px solid #ddd;
+  border-radius:10px;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
+  font-size:14px;
 }
 
 th,td{
-  padding:14px;
-  border-bottom:1px solid #ddd;
-  text-align:left;
+  padding:10px 12px;
+  border-bottom:1px solid #e0e0e0;
 }
 
-th{background:#f4f6fb}
+th{
+  background:#f3f6fb;
+  position:sticky;
+  top:0;
+  z-index:5;
+}
 
 .actions{
   display:flex;
-  gap:8px;
+  gap:6px;
 }
 </style>
 </head>
 
 <body>
-<div class="wrapper">
+<div class="app">
   <div class="card">
-    <h2>📁 Manajemen Arsip Pegawai</h2>
-    <div class="sub">RSUD Dr. Soedarso</div>
 
-    <div class="tabs">
-      <div class="tab active" onclick="showTab('upload')">⬆️ Upload Arsip</div>
-      <div class="tab" onclick="showTab('manage')">🔍 Cari & Kelola Arsip</div>
-    </div>
-
-    <!-- ================= UPLOAD ================= -->
-    <div id="uploadTab">
-      <form id="form">
-        <div class="form-grid">
-
-          <div class="relative">
-            <label>Nama Pegawai</label>
-            <input id="nama" autocomplete="off" required>
-            <div id="suggestion"></div>
-          </div>
-
-          <div>
-            <label>NIP / NIK</label>
-            <input id="nip" readonly required>
-          </div>
-
-          <div>
-            <label>Jenis Arsip</label>
-            <select id="jenis" required>
-              <option value="">-- Pilih --</option>
-              <option value="SK Gaji Berkala">SK Gaji Berkala</option>
-              <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
-              <option value="Cuti">Cuti</option>
-              <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
-              <option value="Pengantar Ukom">Pengantar Ukom</option>
-              <option value="SIB-SIP">SIB / SIP</option>
-            </select>
-          </div>
-
-          <div>
-            <label>Upload File (PDF max 2 MB)</label>
-            <input type="file" id="file" accept="application/pdf" required>
-          </div>
-
-          <div class="full">
-            <button id="btn">Upload Arsip</button>
-            <div id="status"></div>
-          </div>
-
-        </div>
-      </form>
-    </div>
-
-    <!-- ================= MANAGE ================= -->
-    <div id="manageTab" style="display:none">
-      <input id="searchFile" placeholder="Cari nama file..." oninput="loadFiles()">
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama File</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="fileList"></tbody>
-        </table>
+    <div class="header">
+      <h2>📁 Arsip Pegawai RSDS</h2>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('upload',this)">Upload</div>
+        <div class="tab" onclick="switchTab('manage',this)">Kelola Arsip</div>
       </div>
     </div>
 
+    <div class="content">
+
+      <!-- ================= UPLOAD ================= -->
+      <div id="uploadTab">
+        <form id="form">
+          <div class="form-grid">
+
+            <div class="relative">
+              <label>Nama Pegawai</label>
+              <input id="nama" autocomplete="off" required>
+              <div id="suggestion"></div>
+            </div>
+
+            <div>
+              <label>NIP</label>
+              <input id="nip" readonly required>
+            </div>
+
+            <div>
+              <label>Jenis Arsip</label>
+              <select id="jenis" required>
+                <option value="">Pilih</option>
+                <option value="SK Gaji Berkala">SK Gaji Berkala</option>
+                <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
+                <option value="Cuti">Cuti</option>
+                <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
+                <option value="Pengantar Ukom">Pengantar Ukom</option>
+                <option value="SIB-SIP">SIB / SIP</option>
+              </select>
+            </div>
+
+            <div>
+              <label>File PDF (≤ 2 MB)</label>
+              <input type="file" id="file" accept="application/pdf" required>
+            </div>
+
+            <div style="grid-column:1/-1">
+              <button id="btn">⬆️ Upload Arsip</button>
+              <div id="status"></div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= MANAGE ================= -->
+      <div id="manageTab" style="display:none" class="manage">
+        <input id="searchFile" placeholder="Cari nama file..." oninput="loadFiles()">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama File (Terbaru di Atas)</th>
+                <th width="140">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="fileList"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
 <script>
-/* ===== KONFIG ===== */
 const SUPABASE_URL = "https://xmbsrxkhatebzsqeyxms.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnNyeGtoYXRlYnpzcWV5eG1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTU4NjYsImV4cCI6MjA4NjQ5MTg2Nn0.TJCPXhSm_XrIXIl0BgYn3LaF5O7j5zhfqghJUgJSy88";
 const BUCKET = "Arsip RSDS";
@@ -219,12 +265,11 @@ const MAX_SIZE = 2 * 1024 * 1024;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ===== TAB ===== */
-function showTab(tab){
+function switchTab(tab,el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.getElementById("uploadTab").style.display = tab==="upload"?"block":"none";
-  document.getElementById("manageTab").style.display = tab==="manage"?"block":"none";
-  event.target.classList.add("active");
+  el.classList.add("active");
+  uploadTab.style.display = tab==="upload"?"block":"none";
+  manageTab.style.display = tab==="manage"?"flex":"none";
   if(tab==="manage") loadFiles();
 }
 
@@ -253,11 +298,11 @@ nama.oninput = async ()=>{
 form.onsubmit = async e=>{
   e.preventDefault();
   btn.disabled=true;
-  status.textContent="⏳ Mengunggah...";
+  status.textContent="⏳ Uploading...";
 
   const file=fileInput.files[0];
   if(!file || file.size>MAX_SIZE){
-    status.textContent="❌ File max 2 MB";
+    status.textContent="❌ File maksimal 2 MB";
     btn.disabled=false;return;
   }
 
@@ -267,34 +312,38 @@ form.onsubmit = async e=>{
   const fileName = `${safeNama}-${nip.value}-${jenis.value}-${ts}.pdf`;
 
   const {error} = await sb.storage.from(BUCKET).upload(fileName,file,{upsert:false});
-  status.textContent = error ? "❌ Gagal upload" : "✅ Upload berhasil";
+  status.textContent = error ? "❌ Upload gagal" : "✅ Upload berhasil";
   if(!error) e.target.reset();
   btn.disabled=false;
 };
 
-/* ===== LIST & SEARCH ===== */
+/* ===== LIST ===== */
 async function loadFiles(){
-  const q = document.getElementById("searchFile").value.toLowerCase();
+  const q = searchFile.value.toLowerCase();
   const {data} = await sb.storage.from(BUCKET).list("",{limit:1000});
-  const tbody=document.getElementById("fileList");
-  tbody.innerHTML="";
+  fileList.innerHTML="";
   if(!data) return;
 
-  data.filter(f=>f.name.toLowerCase().includes(q)).forEach(f=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${f.name}</td>
-      <td class="actions">
-        <a href="${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${f.name}" target="_blank">
-          <button class="small">Download</button>
-        </a>
-        <button class="small danger" onclick="deleteFile('${f.name}')">Delete</button>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+  data
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+    .filter(f=>f.name.toLowerCase().includes(q))
+    .forEach(f=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${f.name}</td>
+        <td class="actions">
+          <button class="small" onclick="viewFile('${f.name}')">👁️ View</button>
+          <button class="small danger" onclick="deleteFile('${f.name}')">🗑️ Delete</button>
+        </td>`;
+      fileList.appendChild(tr);
+    });
 }
 
-/* ===== DELETE ===== */
+function viewFile(name){
+  const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(name)}`;
+  window.open(url,"_blank");
+}
+
 async function deleteFile(name){
   if(!confirm("Yakin hapus arsip ini?")) return;
   await sb.storage.from(BUCKET).remove([name]);
