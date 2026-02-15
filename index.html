@@ -32,24 +32,16 @@ body{
   flex-direction:column;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 .header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin-bottom:12px;
 }
+.header h2{margin:0;font-size:24px}
 
-.header h2{
-  margin:0;
-  font-size:24px;
-}
-
-.tabs{
-  display:flex;
-  gap:6px;
-}
-
+.tabs{display:flex;gap:6px}
 .tab{
   padding:8px 14px;
   border-radius:10px;
@@ -57,19 +49,11 @@ body{
   cursor:pointer;
   background:#eef2f9;
 }
+.tab.active{background:#1976d2;color:#fff}
 
-.tab.active{
-  background:#1976d2;
-  color:#fff;
-}
+.content{flex:1;overflow:hidden}
 
-/* ===== CONTENT ===== */
-.content{
-  flex:1;
-  overflow:hidden;
-}
-
-/* ===== UPLOAD CENTER ===== */
+/* UPLOAD */
 .upload-center{
   height:100%;
   display:flex;
@@ -77,23 +61,10 @@ body{
   align-items:flex-start;
   padding-top:30px;
 }
+.upload-wrap{width:100%;max-width:680px}
+.upload-group{margin-bottom:16px}
 
-.upload-wrap{
-  width:100%;
-  max-width:680px;
-}
-
-.upload-group{
-  margin-bottom:16px;
-}
-
-label{
-  font-size:13px;
-  font-weight:700;
-  display:block;
-  margin-bottom:6px;
-}
-
+label{font-size:13px;font-weight:700;margin-bottom:6px;display:block}
 input,select{
   width:100%;
   padding:13px 14px;
@@ -101,7 +72,6 @@ input,select{
   border:1px solid #ccc;
   font-size:14px;
 }
-
 input[type=file]{
   border:2px dashed #1976d2;
   background:#f4f8ff;
@@ -117,22 +87,15 @@ button{
   cursor:pointer;
   width:100%;
 }
-
 button:disabled{background:#aaa}
 
-#status{
-  margin-top:10px;
-  font-weight:700;
-}
+#status{margin-top:10px;font-weight:700}
 
-/* ===== AUTOCOMPLETE ===== */
+/* AUTOCOMPLETE */
 .relative{position:relative}
-
 #suggestion{
   position:absolute;
-  top:100%;
-  left:0;
-  right:0;
+  top:100%;left:0;right:0;
   background:#fff;
   border-radius:8px;
   box-shadow:0 6px 20px rgba(0,0,0,.2);
@@ -140,54 +103,34 @@ button:disabled{background:#aaa}
   overflow-y:auto;
   z-index:99;
 }
-
-.item{
-  padding:10px;
-  cursor:pointer;
-}
+.item{padding:10px;cursor:pointer}
 .item:hover{background:#f1f1f1}
 
-/* ===== MANAGE (TIDAK DIUBAH) ===== */
+/* MANAGE */
 .manage{
   height:100%;
   display:flex;
   flex-direction:column;
 }
-
-.manage input{
-  margin-bottom:10px;
-}
-
+.manage input{margin-bottom:10px}
 .table-wrap{
   flex:1;
   overflow:auto;
   border:1px solid #ddd;
   border-radius:10px;
 }
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
+table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{
   padding:10px 12px;
   border-bottom:1px solid #e0e0e0;
 }
-
 th{
   background:#f3f6fb;
   position:sticky;
   top:0;
   z-index:5;
 }
-
-.actions{
-  display:flex;
-  gap:6px;
-}
-
+.actions{display:flex;gap:6px}
 button.small{padding:6px 10px;font-size:13px}
 button.danger{background:#d32f2f}
 </style>
@@ -207,10 +150,9 @@ button.danger{background:#d32f2f}
 
     <div class="content">
 
-      <!-- ================= UPLOAD (CENTER) ================= -->
+      <!-- UPLOAD -->
       <div id="uploadTab" class="upload-center">
         <form id="form" class="upload-wrap">
-
           <div class="upload-group relative">
             <label>Nama Pegawai</label>
             <input id="nama" autocomplete="off" required>
@@ -242,11 +184,10 @@ button.danger{background:#d32f2f}
 
           <button id="btn">⬆️ Upload Arsip</button>
           <div id="status"></div>
-
         </form>
       </div>
 
-      <!-- ================= MANAGE (ASLI) ================= -->
+      <!-- MANAGE -->
       <div id="manageTab" style="display:none" class="manage">
         <input id="searchFile" placeholder="Cari nama file..." oninput="loadFiles()">
         <div class="table-wrap">
@@ -267,112 +208,142 @@ button.danger{background:#d32f2f}
 </div>
 
 <script>
+/* ===== KONFIG ===== */
 const SUPABASE_URL = "https://xmbsrxkhatebzsqeyxms.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnNyeGtoYXRlYnpzcWV5eG1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTU4NjYsImV4cCI6MjA4NjQ5MTg2Nn0.TJCPXhSm_XrIXIl0BgYn3LaF5O7j5zhfqghJUgJSy88";
 const BUCKET = "Arsip RSDS";
 const MAX_SIZE = 2 * 1024 * 1024;
+const UPLOAD_TIMEOUT = 20000;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function switchTab(tab,el){
+/* ===== ELEMENT BINDING (WAJIB) ===== */
+const uploadTab = document.getElementById("uploadTab");
+const manageTab = document.getElementById("manageTab");
+const form = document.getElementById("form");
+const btn = document.getElementById("btn");
+const status = document.getElementById("status");
+const fileInput = document.getElementById("file");
+const searchFile = document.getElementById("searchFile");
+const fileList = document.getElementById("fileList");
+
+const nama = document.getElementById("nama");
+const nip = document.getElementById("nip");
+const jenis = document.getElementById("jenis");
+const suggestion = document.getElementById("suggestion");
+
+/* ===== TAB ===== */
+function switchTab(tab, el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   el.classList.add("active");
-  uploadTab.style.display = tab==="upload"?"flex":"none";
-  manageTab.style.display = tab==="manage"?"flex":"none";
+  uploadTab.style.display = tab==="upload" ? "flex" : "none";
+  manageTab.style.display = tab==="manage" ? "flex" : "none";
   if(tab==="manage") loadFiles();
 }
 
-/* AUTOCOMPLETE */
+/* ===== AUTOCOMPLETE ===== */
 nama.oninput = async ()=>{
   suggestion.innerHTML="";
-  if(nama.value.length<2) return;
-  const {data} = await sb.from("data_sync_pegawai")
+  if(nama.value.length < 2) return;
+
+  const { data } = await sb
+    .from("data_sync_pegawai")
     .select("nama,nip_nik")
-    .ilike("nama",`%${nama.value}%`).limit(10);
+    .ilike("nama", `%${nama.value}%`)
+    .limit(10);
+
   if(!data) return;
   data.forEach(r=>{
-    const d=document.createElement("div");
-    d.className="item";
-    d.textContent=r.nama;
-    d.onclick=()=>{
-      nama.value=r.nama;
-      nip.value=r.nip_nik;
+    const d = document.createElement("div");
+    d.className = "item";
+    d.textContent = r.nama;
+    d.onclick = ()=>{
+      nama.value = r.nama;
+      nip.value = r.nip_nik;
       suggestion.innerHTML="";
     };
     suggestion.appendChild(d);
   });
 };
 
-/* UPLOAD */
+/* ===== UPLOAD (STABIL) ===== */
 form.onsubmit = async e=>{
   e.preventDefault();
   if(btn.disabled) return;
 
   btn.disabled = true;
-  status.textContent = "⏳ Mengunggah ke server...";
+  status.textContent = "⏳ Mengunggah...";
 
-  try {
+  try{
     const file = fileInput.files[0];
-    if (!file) throw "File tidak ditemukan";
-    if (file.size > MAX_SIZE) throw "Ukuran file maksimal 2 MB";
+    if(!file) throw "File tidak ada";
+    if(file.size > MAX_SIZE) throw "Ukuran file > 2 MB";
 
     const now = new Date();
-    const ts =
-      now.getFullYear() + "-" +
-      String(now.getMonth()+1).padStart(2,"0") + "-" +
-      String(now.getDate()).padStart(2,"0") + "_" +
-      String(now.getHours()).padStart(2,"0") + "-" +
-      String(now.getMinutes()).padStart(2,"0") + "-" +
-      String(now.getSeconds()).padStart(2,"0");
-
+    const ts = now.toISOString().replace(/[:.]/g,"-");
     const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
     const fileName = `${safeNama}-${nip.value}-${jenis.value}-${ts}.pdf`;
 
-    let uploaded = false;
-    let lastError = null;
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), UPLOAD_TIMEOUT);
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        status.textContent = `⏳ Upload percobaan ${attempt}...`;
+    const { error } = await sb.storage
+      .from(BUCKET)
+      .upload(fileName, file, {
+        upsert:false,
+        signal: controller.signal
+      });
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 20000);
-
-        const { error } = await sb.storage
-          .from(BUCKET)
-          .upload(fileName, file, {
-            upsert: false,
-            signal: controller.signal
-          });
-
-        clearTimeout(timeout);
-
-        if (error) throw error;
-        uploaded = true;
-        break;
-
-      } catch (err) {
-        lastError = err;
-        await new Promise(r => setTimeout(r, 1200));
-      }
-    }
-
-    if (!uploaded) {
-      throw lastError || "Upload gagal";
-    }
+    clearTimeout(timeout);
+    if(error) throw error;
 
     status.textContent = "✅ Arsip berhasil diupload";
     form.reset();
 
-  } catch (err) {
+  }catch(err){
     status.textContent =
       err.name === "AbortError"
         ? "❌ Upload timeout (koneksi lambat)"
         : "❌ Upload gagal, silakan ulangi";
-
-  } finally {
+  }finally{
     btn.disabled = false;
   }
+};
+
+/* ===== MANAGE ===== */
+async function loadFiles(){
+  const q = searchFile.value.toLowerCase();
+  const { data } = await sb.storage.from(BUCKET).list("", { limit: 1000 });
+  fileList.innerHTML = "";
+  if(!data) return;
+
+  data
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+    .filter(f=>f.name.toLowerCase().includes(q))
+    .forEach(f=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${f.name}</td>
+        <td class="actions">
+          <button class="small" onclick="viewFile('${f.name}')">👁️ View</button>
+          <button class="small danger" onclick="deleteFile('${f.name}')">🗑️ Delete</button>
+        </td>`;
+      fileList.appendChild(tr);
+    });
+}
+
+function viewFile(name){
+  window.open(
+    `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(name)}`,
+    "_blank"
+  );
+}
+
+async function deleteFile(name){
+  if(!confirm("Yakin hapus arsip ini?")) return;
+  await sb.storage.from(BUCKET).remove([name]);
+  loadFiles();
+}
 </script>
 </body>
 </html>
