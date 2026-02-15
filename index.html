@@ -69,13 +69,22 @@ body{
   overflow:hidden;
 }
 
-/* ===== UPLOAD (VERTIKAL) ===== */
+/* ===== UPLOAD CENTER ===== */
+.upload-center{
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:30px;
+}
+
 .upload-wrap{
-  max-width:600px;          /* fokus PC, tidak kepanjangan */
+  width:100%;
+  max-width:680px;
 }
 
 .upload-group{
-  margin-bottom:14px;
+  margin-bottom:16px;
 }
 
 label{
@@ -87,7 +96,7 @@ label{
 
 input,select{
   width:100%;
-  padding:12px 14px;
+  padding:13px 14px;
   border-radius:8px;
   border:1px solid #ccc;
   font-size:14px;
@@ -198,8 +207,8 @@ button.danger{background:#d32f2f}
 
     <div class="content">
 
-      <!-- ================= UPLOAD (VERTIKAL) ================= -->
-      <div id="uploadTab">
+      <!-- ================= UPLOAD (CENTER) ================= -->
+      <div id="uploadTab" class="upload-center">
         <form id="form" class="upload-wrap">
 
           <div class="upload-group relative">
@@ -268,7 +277,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 function switchTab(tab,el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   el.classList.add("active");
-  uploadTab.style.display = tab==="upload"?"block":"none";
+  uploadTab.style.display = tab==="upload"?"flex":"none";
   manageTab.style.display = tab==="manage"?"flex":"none";
   if(tab==="manage") loadFiles();
 }
