@@ -22,10 +22,9 @@ body{
   justify-content:center;
 }
 
-/* === WRAPPER & CARD DIBESARKAN UNTUK PC === */
 .wrapper{
   width:100%;
-  max-width:1200px; /* LEBAR PC */
+  max-width:1200px;
   padding:60px;
 }
 
@@ -36,7 +35,6 @@ body{
   box-shadow:0 25px 60px rgba(0,0,0,.3);
 }
 
-/* === JUDUL === */
 h2{
   margin:0;
   font-size:32px;
@@ -50,7 +48,6 @@ h2{
   font-size:17px;
 }
 
-/* === GRID FORM === */
 .form-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -61,7 +58,6 @@ h2{
   grid-column:1 / -1;
 }
 
-/* === LABEL === */
 label{
   font-weight:700;
   display:block;
@@ -69,7 +65,6 @@ label{
   font-size:16px;
 }
 
-/* === INPUT & SELECT DIPERBESAR === */
 input,
 select{
   width:100%;
@@ -85,7 +80,6 @@ select:focus{
   border-color:#1976d2;
 }
 
-/* === FILE INPUT KHUSUS DIPERBESAR === */
 input[type="file"]{
   padding:22px;
   font-size:16px;
@@ -94,7 +88,6 @@ input[type="file"]{
   background:#f4f8ff;
 }
 
-/* === BUTTON === */
 button{
   margin-top:40px;
   width:100%;
@@ -109,10 +102,10 @@ button{
 }
 
 button:disabled{
-  background:#aaa;
+  background:#999;
+  cursor:not-allowed;
 }
 
-/* === STATUS === */
 #status{
   margin-top:20px;
   text-align:center;
@@ -120,7 +113,6 @@ button:disabled{
   font-size:16px;
 }
 
-/* === AUTOCOMPLETE === */
 .relative{
   position:relative;
 }
@@ -145,7 +137,6 @@ button:disabled{
 .item:hover{
   background:#f1f1f1;
 }
-
 </style>
 </head>
 
@@ -172,24 +163,18 @@ button:disabled{
         <div>
           <label>Jenis Arsip</label>
           <select id="jenis" required>
-  <option value="">-- Pilih Jenis Arsip --</option>
-
-  <option value="SK Gaji Berkala">SK Gaji Berkala</option>
-  <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
-
-  <option value="Cuti">Cuti</option>
-
-  <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
-  <option value="Pengantar Ukom">Pengantar Ukom</option>
-
-  <option value="SIB-SIP">SIB / SIP</option>
-</select>
-
+            <option value="">-- Pilih Jenis Arsip --</option>
+            <option value="SK Gaji Berkala">SK Gaji Berkala</option>
+            <option value="Pengantar OPD Gaji Berkala">Pengantar OPD Gaji Berkala</option>
+            <option value="Cuti">Cuti</option>
+            <option value="Pengantar OPD Pangkat">Pengantar OPD Pangkat</option>
+            <option value="Pengantar Ukom">Pengantar Ukom</option>
+            <option value="SIB-SIP">SIB / SIP</option>
           </select>
         </div>
 
         <div>
-          <label>Upload File (PDF)</label>
+          <label>Upload File (PDF, max 2 MB)</label>
           <input type="file" id="file" accept="application/pdf" required>
         </div>
 
@@ -208,8 +193,9 @@ button:disabled{
 const SUPABASE_URL = "https://xmbsrxkhatebzsqeyxms.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnNyeGtoYXRlYnpzcWV5eG1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MTU4NjYsImV4cCI6MjA4NjQ5MTg2Nn0.TJCPXhSm_XrIXIl0BgYn3LaF5O7j5zhfqghJUgJSy88";
 const BUCKET = "Arsip RSDS";
+const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+const UPLOAD_TIMEOUT = 20000; // 20 detik
 
-/* ================= INIT ================= */
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const nama = document.getElementById("nama");
@@ -249,8 +235,10 @@ nama.addEventListener("input", async () => {
 /* ================= SUBMIT ================= */
 document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
+  if (btn.disabled) return;
+
   btn.disabled = true;
-  statusBox.textContent = "⏳ Mengunggah...";
+  statusBox.textContent = "⏳ Mengunggah ke server, mohon tunggu...";
 
   const file = fileInput.files[0];
   if (!file || file.type !== "application/pdf") {
@@ -259,29 +247,42 @@ document.getElementById("form").addEventListener("submit", async e => {
     return;
   }
 
+  if (file.size > MAX_SIZE) {
+    statusBox.textContent = "❌ Ukuran file maksimal 2 MB";
+    btn.disabled = false;
+    return;
+  }
+
   const now = new Date();
+  const tanggal =
+    String(now.getDate()).padStart(2,"0") + "-" +
+    String(now.getMonth()+1).padStart(2,"0") + "-" +
+    now.getFullYear();
 
-const tanggal =
-  String(now.getDate()).padStart(2,"0") + "-" +
-  String(now.getMonth()+1).padStart(2,"0") + "-" +
-  now.getFullYear();
+  const jam =
+    String(now.getHours()).padStart(2,"0") + "-" +
+    String(now.getMinutes()).padStart(2,"0") + "-" +
+    String(now.getSeconds()).padStart(2,"0");
 
-const jam =
-  String(now.getHours()).padStart(2,"0") + "-" +
-  String(now.getMinutes()).padStart(2,"0") + "-" +
-  String(now.getSeconds()).padStart(2,"0");
+  const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
+  const fileName = `${safeNama}-${nip.value}-${jenis.value}-${tanggal}_${jam}.pdf`;
 
-const safeNama = nama.value.replace(/[\\/:"*?<>|]/g,"");
+  const uploadPromise = sb.storage
+    .from(BUCKET)
+    .upload(fileName, file, { upsert:false });
 
-const fileName =
-  `${safeNama}-${nip.value}-${jenis.value}-${tanggal}_${jam}.pdf`;
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("TIMEOUT")), UPLOAD_TIMEOUT)
+  );
 
+  try {
+    await Promise.race([uploadPromise, timeoutPromise]);
+    statusBox.textContent = "✅ Arsip berhasil diupload";
+    e.target.reset();
+  } catch {
+    statusBox.textContent = "❌ Upload gagal / koneksi lambat";
+  }
 
-  statusBox.textContent = error
-    ? "❌ Gagal upload"
-    : "✅ Arsip berhasil diupload";
-
-  if (!error) e.target.reset();
   btn.disabled = false;
 });
 </script>
